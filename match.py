@@ -1,7 +1,7 @@
 """Student-track matching algorithm"""
 
 import csv
-from typing import NamedTuple, Tuple, List
+from typing import NamedTuple, Tuple, List, Dict, Optional
 
 
 class Student(NamedTuple):
@@ -11,37 +11,28 @@ class Student(NamedTuple):
     preference_list: Tuple[str]
 
     def __str__(self):
-        return f"{self.last_name} {self.first_name} ({self.avg_grade}) - {self.preference_list}"
-
-
-class Track(NamedTuple):
-    name: str
-    capacity: int
-
-    def __str__(self):
-        return f"{self.name} ({self.capacity} places)"
+        return f"{self.last_name} {self.first_name} ({self.avg_grade})"
 
 
 class Match(NamedTuple):
-    student_last_name: str
-    student_first_name: str
+    student: Student
     track_name: str
     preference_rank: int
 
 
-def init_tracks() -> Tuple[Track]:
-    """Init tracks"""
+def get_track_capacities() -> Dict[str, int]:
+    """Return track capacities"""
 
-    return (
-        Track("Augmentation et Autonomie", 24),
-        Track("Systèmes Cognitifs Hybrides", 24),
-        Track("Intelligence Artificielle", 11),
-        Track("Robotique", 10),
-    )
+    return {
+        "Augmentation et Autonomie": 24,
+        "Systèmes Cognitifs Hybrides": 24,
+        "Intelligence Artificielle": 11,
+        "Robotique": 10,
+    }
 
 
 def init_students() -> List[Student]:
-    """Load students and their preferences from CSV file"""
+    """Load students and their track preferences from CSV file"""
 
     student_list: List[Student] = []
 
@@ -62,28 +53,123 @@ def init_students() -> List[Student]:
     return student_list
 
 
-def get_capacity(track_list: Tuple[Track], track_name: str) -> int:
-    return [track.capacity for track in track_list if track.name == track_name][0]
+def match_student(
+    student: Student, track_count: Dict[str, int], track_capacities: Dict[str, int],
+) -> Optional[Match]:
+    """Match a student to a track according to his preferences, track count and track capacity"""
+
+    rank = 0  # Try first preference
+    track_name = student.preference_list[rank]
+
+    # Iterate on student preferences to find a non-full track
+    while track_count[track_name] == track_capacities[track_name] and rank < len(
+        student.preference_list
+    ):
+        rank += 1  # Try next preference
+        if rank < len(student.preference_list):
+            track_name = student.preference_list[rank]
+
+    if rank < len(student.preference_list):
+        # A non-full track was found in student preferences
+        return Match(student, track_name, rank + 1)
+
+    # No track was found for this student
+    return None
 
 
-track_list = init_tracks()
-student_list = init_students()
+def match(student_list: List[Student], track_capacities: Dict[str, int]) -> List[Match]:
+    """Match students to tracks according to their rank and preferences"""
 
-print("--- Liste des parcours ---")
-print(*track_list, sep="\n")
-print()
+    match_list: List[Match] = []
 
-print("--- Liste des étudiants ---")
-print(*student_list, sep="\n")
+    # Sort students by merit (best grade first)
+    sorted_student_list = sorted(
+        student_list, key=lambda student: student.avg_grade, reverse=True
+    )
+    # print(*sorted_student_list, sep="\n")
 
-# Sort students by merit (best grade first)
-sorted_student_list = sorted(
-    student_list, key=lambda student: student.avg_grade, reverse=True
-)
-print(*sorted_student_list, sep="\n")
+    # Init student count to 0 for all tracks
+    track_count: Dict[str, int] = dict.fromkeys(track_capacities.keys(), 0)
 
-match_list: List[Match] = []
+    for student in sorted_student_list:
+        match = match_student(student, track_count, track_capacities)
+        if match is not None:
+            match_list.append(match)
+            track_count[match.track_name] += 1
+        else:
+            print(f"ALERTE ! Aucun parcours disponible pour l'étudiant {student}")
 
-for student in sorted_student_list:
-    rank: int = 0
-    # while get_capacity(track_list, student.preference_list[rank])
+    return match_list
+
+
+def print_input(students: List[Student], track_capacities: Dict[str, int]) -> None:
+    """Print input summary"""
+
+    total_capacity: int = sum(track_capacities.values())
+    print(
+        f"{len(track_capacities)} parcours ({total_capacity} places) pour {len(students)} étudiants"
+    )
+
+
+def print_results(results: List[Match]) -> None:
+    """Print results summary"""
+
+    total_match_count = len(results)
+    print(f"{total_match_count} affectations")
+
+    track_capacities = get_track_capacities()
+    track_count = len(track_capacities)
+
+    # Print summary for ranks
+    for rank in range(1, track_count):
+        match_count = len([match for match in results if match.preference_rank == rank])
+        match_percent: float = match_count / total_match_count
+        print(
+            f"Voeu {rank} : {match_count} affectation(s) ({match_percent * 100:.2f} %)"
+        )
+
+    # Print summary for tracks
+    for track_name in track_capacities.keys():
+        student_count = len(
+            [match for match in results if match.track_name == track_name]
+        )
+        print(f"{track_name} : {student_count} étudiants")
+
+
+def save_results(results: List[Match]) -> None:
+    """Save results to CSV file"""
+
+    with open("results.csv", "w", newline="") as file:
+        writer = csv.writer(file, delimiter=";")
+        for match in results:
+            writer.writerow(
+                [
+                    match.student.last_name + " " + match.student.first_name,
+                    match.track_name,
+                    match.preference_rank,
+                ]
+            )
+
+
+def main():
+    student_list = init_students()
+    track_capacities = get_track_capacities()
+
+    print_input(student_list, track_capacities)
+
+    # print("--- Liste des parcours ---")
+    # print(*track_capacities, sep="\n")
+    # print()
+
+    # print("--- Liste des étudiants ---")
+    # print(*student_list, sep="\n")
+    # print()
+
+    results = match(student_list, track_capacities)
+
+    print_results(results)
+    save_results(results)
+
+
+if __name__ == "__main__":
+    main()
