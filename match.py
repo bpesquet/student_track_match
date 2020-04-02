@@ -8,7 +8,7 @@ class Student(NamedTuple):
     last_name: str
     first_name: str
     avg_grade: float
-    preference_list: Tuple[str]
+    wish_list: Tuple[str]
 
     def __str__(self):
         return f"{self.last_name} {self.first_name} ({self.avg_grade})"
@@ -17,7 +17,7 @@ class Student(NamedTuple):
 class Match(NamedTuple):
     student: Student
     track_name: str
-    preference_rank: int
+    wish_rank: int
 
 
 def get_track_capacities() -> Dict[str, int]:
@@ -32,7 +32,7 @@ def get_track_capacities() -> Dict[str, int]:
 
 
 def init_students() -> List[Student]:
-    """Load students and their track preferences from CSV file"""
+    """Load students and their track wishes from CSV file"""
 
     student_list: List[Student] = []
 
@@ -40,13 +40,13 @@ def init_students() -> List[Student]:
         reader = csv.reader(file, delimiter=";")
         next(reader)  # Skip column names
         for row in reader:
-            # Preferences are already sorted in CSV file
-            preference_list = (row[3], row[4], row[5], row[6])
+            # Wishes are already sorted in CSV file
+            wish_list = (row[3], row[4], row[5], row[6])
             student = Student(
                 last_name=row[0],
                 first_name=row[1],
                 avg_grade=row[2],
-                preference_list=preference_list,
+                wish_list=wish_list,
             )
             student_list.append(student)
 
@@ -56,21 +56,21 @@ def init_students() -> List[Student]:
 def match_student(
     student: Student, track_count: Dict[str, int], track_capacities: Dict[str, int],
 ) -> Optional[Match]:
-    """Match a student to a track according to his preferences, track count and track capacity"""
+    """Match a student to a track according to his wishes, track count and track capacity"""
 
-    rank = 0  # Try first preference
-    track_name = student.preference_list[rank]
+    rank = 0  # Try first wish
+    track_name = student.wish_list[rank]
 
-    # Iterate on student preferences to find a non-full track
+    # Iterate on student wishes to find a non-full track
     while track_count[track_name] == track_capacities[track_name] and rank < len(
-        student.preference_list
+        student.wish_list
     ):
-        rank += 1  # Try next preference
-        if rank < len(student.preference_list):
-            track_name = student.preference_list[rank]
+        rank += 1  # Try next wish
+        if rank < len(student.wish_list):
+            track_name = student.wish_list[rank]
 
-    if rank < len(student.preference_list):
-        # A non-full track was found in student preferences
+    if rank < len(student.wish_list):
+        # A non-full track was found in student wishes
         return Match(student, track_name, rank + 1)
 
     # No track was found for this student
@@ -78,7 +78,7 @@ def match_student(
 
 
 def match(student_list: List[Student], track_capacities: Dict[str, int]) -> List[Match]:
-    """Match students to tracks according to their rank and preferences"""
+    """Match students to tracks according to their merit, wishes and track capacities"""
 
     match_list: List[Match] = []
 
@@ -111,18 +111,18 @@ def print_input(students: List[Student], track_capacities: Dict[str, int]) -> No
     )
 
 
-def print_results(results: List[Match]) -> None:
+def print_results(match_list: List[Match]) -> None:
     """Print results summary"""
 
-    total_match_count = len(results)
+    total_match_count = len(match_list)
     print(f"{total_match_count} affectations")
 
     track_capacities = get_track_capacities()
     track_count = len(track_capacities)
 
-    # Print summary for ranks
+    # Print summary for wishes
     for rank in range(1, track_count):
-        match_count = len([match for match in results if match.preference_rank == rank])
+        match_count = len([match for match in match_list if match.wish_rank == rank])
         match_percent: float = match_count / total_match_count
         print(
             f"Voeu {rank} : {match_count} affectation(s) ({match_percent * 100:.2f} %)"
@@ -131,22 +131,35 @@ def print_results(results: List[Match]) -> None:
     # Print summary for tracks
     for track_name in track_capacities.keys():
         student_count = len(
-            [match for match in results if match.track_name == track_name]
+            [match for match in match_list if match.track_name == track_name]
         )
         print(f"{track_name} : {student_count} étudiants")
 
 
-def save_results(results: List[Match]) -> None:
+def save_results(match_list: List[Match]) -> None:
     """Save results to CSV file"""
 
-    with open("results.csv", "w", newline="") as file:
+    # Sort results by track name then student name
+    sorted_match_list: List[Match] = sorted(
+        match_list,
+        key=lambda match: (
+            match.track_name,
+            match.student.last_name,
+            match.student.first_name,
+        ),
+    )
+
+    # Excel needs UTF8 with BOM encoding
+    with open("results.csv", "w", newline="", encoding="utf-8-sig") as file:
+        field_names = ["Nom", "Prénom", "Parcours", "Voeu"]
         writer = csv.writer(file, delimiter=";")
-        for match in results:
+        for match in sorted_match_list:
             writer.writerow(
                 [
-                    match.student.last_name + " " + match.student.first_name,
+                    match.student.last_name,
+                    match.student.first_name,
                     match.track_name,
-                    match.preference_rank,
+                    match.wish_rank,
                 ]
             )
 
@@ -165,10 +178,10 @@ def main():
     # print(*student_list, sep="\n")
     # print()
 
-    results = match(student_list, track_capacities)
+    match_list = match(student_list, track_capacities)
 
-    print_results(results)
-    save_results(results)
+    print_results(match_list)
+    save_results(match_list)
 
 
 if __name__ == "__main__":
