@@ -5,16 +5,20 @@ from typing import NamedTuple, Tuple, List, Dict, Optional
 
 
 class Student(NamedTuple):
+    """A student with his grades and wishes"""
+
     last_name: str
     first_name: str
     avg_grade: float
-    wish_list: Tuple[str]
+    wish_list: Tuple[str, ...]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.last_name} {self.first_name} ({self.avg_grade})"
 
 
 class Match(NamedTuple):
+    """A match between a student and a track"""
+
     student: Student
     track_name: str
     wish_rank: int
@@ -45,7 +49,7 @@ def init_students() -> List[Student]:
             student = Student(
                 last_name=row[0],
                 first_name=row[1],
-                avg_grade=row[2],
+                avg_grade=float(row[2]),
                 wish_list=wish_list,
             )
             student_list.append(student)
@@ -77,7 +81,9 @@ def match_student(
     return None
 
 
-def match(student_list: List[Student], track_capacities: Dict[str, int]) -> List[Match]:
+def match_students(
+    student_list: List[Student], track_capacities: Dict[str, int]
+) -> List[Match]:
     """Match students to tracks according to their merit, wishes and track capacities"""
 
     match_list: List[Match] = []
@@ -129,7 +135,7 @@ def print_results(match_list: List[Match]) -> None:
         )
 
     # Print summary for tracks
-    for track_name in track_capacities.keys():
+    for track_name in track_capacities:
         student_count = len(
             [match for match in match_list if match.track_name == track_name]
         )
@@ -151,8 +157,9 @@ def save_results(match_list: List[Match]) -> None:
 
     # Excel needs UTF8 with BOM encoding
     with open("results.csv", "w", newline="", encoding="utf-8-sig") as file:
-        field_names = ["Nom", "Prénom", "Parcours", "Voeu"]
         writer = csv.writer(file, delimiter=";")
+        # Write header (columns names)
+        writer.writerow(["Nom", "Prénom", "Parcours", "Voeu"])
         for match in sorted_match_list:
             writer.writerow(
                 [
@@ -164,7 +171,9 @@ def save_results(match_list: List[Match]) -> None:
             )
 
 
-def main():
+def main() -> None:
+    """Main function"""
+
     student_list = init_students()
     track_capacities = get_track_capacities()
 
@@ -178,7 +187,7 @@ def main():
     # print(*student_list, sep="\n")
     # print()
 
-    match_list = match(student_list, track_capacities)
+    match_list = match_students(student_list, track_capacities)
 
     print_results(match_list)
     save_results(match_list)
