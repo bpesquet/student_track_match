@@ -1,8 +1,20 @@
-"""Student-track matching algorithm"""
+"""
+Student-track matching algorithm for Ecole Nationale Supérieure de Cognitique (ENSC)
+Assigns students to specialty tracks based on their wishes and track capacities
+
+Input data (student names, grades and track wishes) is loaded from a CSV file
+Students ranking and track assignments are written to CSV files
+
+Algorithm goes as follow:
+- For each student, a weighted average of their grades during past semesters is computed
+- These average grades are used to sort students by merit (best first)
+- In that order, students are assigned to the highest non-full track in their wishes
+"""
 
 import csv
 import sys
 from typing import NamedTuple, Tuple, List, Dict, Optional
+from dataclasses import dataclass, field
 
 
 def get_semester_weights() -> Dict[str, int]:
@@ -13,8 +25,9 @@ def get_semester_weights() -> Dict[str, int]:
 
 
 def get_track_capacities() -> Dict[str, int]:
-    """Return track capacities"""
+    """Return track capacities (maximum number of students)"""
 
+    # Names must exactly match track names in students CSV file
     return {
         "Augmentation et Autonomie": 24,
         "Systèmes Cognitifs Hybrides": 24,
@@ -23,35 +36,28 @@ def get_track_capacities() -> Dict[str, int]:
     }
 
 
+@dataclass
 class Student:
-    """A student with his average grade and track wishes"""
+    """A student with his grades and track wishes"""
 
     last_name: str
     first_name: str
+    grade_list: Dict[str, Optional[float]]
     wish_list: Tuple[str, ...]
-    avg_grade: float
+    avg_grade: float = field(init=False, repr=False)  # Computed after init
 
-    def __init__(
-        self,
-        last_name: str,
-        first_name: str,
-        grade_list: Dict[str, Optional[float]],
-        wish_list: Tuple[str, ...],
-    ):
-        self.last_name = last_name
-        self.first_name = first_name
-        self.wish_list = wish_list
-        self.avg_grade = self.__compute_avg_grade(grade_list)
+    def __post_init__(self) -> None:
+        self.avg_grade = self.__compute_avg_grade()
 
-    def __compute_avg_grade(self, grade_list: Dict[str, Optional[float]]) -> float:
-        """Compute and return weighted average of grades"""
+    def __compute_avg_grade(self) -> float:
+        """Compute and return weighted average of student grades"""
 
         weighted_grade_sum: float = 0
         weight_count: int = 0
         semester_weights: Dict[str, int] = get_semester_weights()
 
         # Compute weighted sum of student grades
-        for (semester, grade) in grade_list.items():
+        for (semester, grade) in self.grade_list.items():
             if semester in semester_weights:
                 if grade is not None:
                     weight = semester_weights[semester]
@@ -91,7 +97,12 @@ def french_float(value: str) -> Optional[float]:
 
 
 def init_students(file_name: str) -> List[Student]:
-    """Load students with grades and track wishes from CSV file"""
+    """
+    Load students with grades and track wishes from CSV file
+
+    The student CSV file must contain one line per student, with the following format:
+      last name, first name, grades for past 4 semesters, wishes for all tracks
+    """
 
     student_list: List[Student] = []
     # Used to iterate on semester names by index
