@@ -1,14 +1,5 @@
 """
-Student-track matching algorithm for Ecole Nationale Supérieure de Cognitique (ENSC)
-Assigns students to specialty tracks based on their wishes and track capacities
-
-Input data (student names, grades and track wishes) is loaded from a CSV file
-Students ranking and track assignments are written to CSV files
-
-Algorithm goes as follow:
-- For each student, a weighted average of their grades during past semesters is computed
-- These average grades are used to sort students by merit (best first)
-- In that order, students are assigned to the highest non-full track in their wishes
+Student/track matching script
 """
 
 import csv
