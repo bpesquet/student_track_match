@@ -1,6 +1,7 @@
 """Student-track matching algorithm"""
 
 import csv
+import sys
 from typing import NamedTuple, Tuple, List, Dict, Optional
 
 
@@ -23,7 +24,7 @@ def get_track_capacities() -> Dict[str, int]:
 
 
 class Student:
-    """A student with his grades and track wishes"""
+    """A student with his average grade and track wishes"""
 
     last_name: str
     first_name: str
@@ -96,7 +97,7 @@ def init_students(file_name: str) -> List[Student]:
     # Used to iterate on semester names by index
     semester_names = list(get_semester_weights().keys())
 
-    with open(f"{file_name}.csv", newline="") as file:
+    with open(file_name, newline="") as file:
         reader = csv.reader(file, delimiter=";")
         next(reader)  # Skip column names
 
@@ -177,10 +178,13 @@ def print_input(
 ) -> None:
     """Print input summary"""
 
+    print("--- Données d'entrée ---")
     total_capacity: int = sum(track_capacities.values())
     print(
         f"{len(track_capacities)} parcours ({total_capacity} places) pour {len(student_list)} étudiants"
     )
+    for (name, capacity) in track_capacities.items():
+        print(f"{name} : {capacity} places")
     print(f"Poids des semestres dans le calcul de la moyenne : {semester_weights}")
 
 
@@ -206,18 +210,20 @@ def save_input(student_list: List[Student]) -> None:
 def print_results(match_list: List[Match], track_capacities: Dict[str, int]) -> None:
     """Print results summary"""
 
+    print("--- Résultats ---")
     total_match_count = len(match_list)
     print(f"{total_match_count} affectations")
 
     track_count = len(track_capacities)
 
     # Print summary for wishes
-    for rank in range(1, track_count):
+    for rank in range(1, track_count + 1):
         match_count = len([match for match in match_list if match.wish_rank == rank])
         match_percent: float = match_count / total_match_count
-        print(
-            f"Voeu {rank} : {match_count} affectation(s) ({match_percent * 100:.2f} %)"
-        )
+        if match_count > 0:
+            print(
+                f"Voeu {rank} : {match_count} affectation(s) ({match_percent * 100:.2f} %)"
+            )
 
     # Print summary for tracks
     for track_name in track_capacities:
@@ -256,22 +262,14 @@ def save_results(match_list: List[Match]) -> None:
             )
 
 
-def main() -> None:
+def main(student_file_name: str) -> None:
     """Main function"""
 
-    student_list = init_students("promo2021")
+    student_list = init_students(student_file_name)
     track_capacities = get_track_capacities()
 
     print_input(student_list, track_capacities, get_semester_weights())
     save_input(student_list)
-
-    # print("--- Liste des parcours ---")
-    # print(*track_capacities, sep="\n")
-    # print()
-
-    # print("--- Liste des étudiants ---")
-    # print(*student_list, sep="\n")
-    # print()
 
     match_list = match_students(student_list, track_capacities)
 
@@ -280,4 +278,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 2:
+        main(student_file_name=sys.argv[1])
+    else:
+        print("Veuillez fournir le nom du fichier CSV des étudiants")
