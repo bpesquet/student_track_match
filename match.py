@@ -159,7 +159,7 @@ def match_students(
         student_list, key=lambda student: student.avg_grade, reverse=True
     )
 
-    # Init student count to 0 for all tracks
+    # Init assigned student count to 0 for all tracks
     track_count: Dict[str, int] = dict.fromkeys(track_capacities.keys(), 0)
 
     for student in sorted_student_list:

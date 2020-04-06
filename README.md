@@ -5,7 +5,7 @@
 
 ## About
 
-This Python script assigns [ENSC](https://ensc.bordeaux-inp.fr) students to specialty tracks based on their grades, track wishes and track capacities.
+This Python script assigns [ENSC](https://ensc.bordeaux-inp.fr) students to specialization tracks based on their grades, track wishes and track capacities.
 
 Input data (student names, grades and track wishes) is loaded from a CSV file. Students ranking and track assignments are written to CSV files.
 
