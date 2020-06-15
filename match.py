@@ -20,9 +20,9 @@ def get_track_capacities() -> Dict[str, int]:
 
     # Names must exactly match track names in students CSV file
     return {
-        "Augmentation et Autonomie": 25,
-        "Systèmes Cognitifs Hybrides": 31,
-        "Intelligence Artificielle": 12,
+        "Augmentation et Autonomie": 30,
+        "Systèmes Cognitifs Hybrides": 30,
+        "Intelligence Artificielle": 14,
         "Robotique": 10,
     }
 
