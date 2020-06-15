@@ -202,10 +202,15 @@ def save_input(student_list: List[Student]) -> None:
     with open("classement.csv", "w", newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file, delimiter=";")
         # Write header (columns names)
-        writer.writerow(["Nom", "Prénom", "Moyenne"])
+        writer.writerow(["Nom", "Prénom", "Moyenne", "Voeu 1"])
         for student in sorted_student_list:
             writer.writerow(
-                [student.last_name, student.first_name, student.avg_grade,]
+                [
+                    student.last_name,
+                    student.first_name,
+                    student.avg_grade,
+                    student.wish_list[0],
+                ]
             )
 
 
