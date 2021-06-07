@@ -1,7 +1,7 @@
 ![Supported Python Versions](https://img.shields.io/badge/Python->=3.7-blue.svg?logo=python&logoColor=white)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-# Student/Track Matching Script
+# Student/track matching script
 
 ## About
 
@@ -14,6 +14,12 @@ Algorithm goes as follow:
 - For each student, a weighted average of their grades during past semesters is computed.
 - These average grades are used to sort students by merit (best first).
 - In that order, students are assigned to the highest non-full track in their wishes.
+
+Input data format is:
+
+| Last name | First name | S5 grade | S6 grade | S7 grade | S8 grade | First track wish | Second track wish | Third track wish | Fourth track wish |
+| --------- | ---------- | -------- | -------- | -------- | -------- | ---------------- | ----------------- | ---------------- | ----------------- |
+| ...       | ...        | ...      | ...      | ...      | ...      | ...              | ...               | ...              | ...               |
 
 ## Usage
 
