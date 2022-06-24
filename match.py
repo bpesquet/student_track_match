@@ -20,9 +20,9 @@ def get_track_capacities() -> Dict[str, int]:
 
     # Names must exactly match track names in students CSV file
     return {
-        "Augmentation et Autonomie": 25,
-        "Systèmes Cognitifs Hybrides": 25,
-        "Intelligence Artificielle": 20,
+        "Augmentation et Autonomie": 24,
+        "Systèmes Cognitifs Hybrides": 24,
+        "Intelligence Artificielle": 24,
         "Robotique": 10,
     }
 
@@ -62,7 +62,7 @@ class Student:
         if weighted_grade_sum > 0:
             return weighted_grade_sum / weight_count
 
-        print(f"ALERTE ! Aucune note trouvée pour l'étudiant {self}")
+        print(f"ALERTE ! Aucune note trouvée pour l'étudiant(e) {self}")
         return 0
 
     def __str__(self) -> str:
@@ -168,7 +168,7 @@ def match_students(
             match_list.append(match)
             track_count[match.track_name] += 1
         else:
-            print(f"ALERTE ! Aucun parcours disponible pour l'étudiant {student}")
+            print(f"ALERTE ! Aucun parcours disponible pour l'étudiant(e) {student}")
 
     return match_list
 
