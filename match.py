@@ -24,6 +24,7 @@ def get_track_capacities() -> Dict[str, int]:
         "Systèmes Cognitifs Hybrides": 24,
         "Intelligence Artificielle": 24,
         "Robotique": 10,
+        "IA@EMMK": 2,
     }
 
 
