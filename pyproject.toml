@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "student-track-match"
+version = "0.1.0"
+description = ""
+authors = ["Baptiste Pesquet <bpesquet@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "student_track_match"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.17.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
