@@ -24,7 +24,8 @@ def get_track_capacities() -> Dict[str, int]:
         "Systèmes Cognitifs Hybrides": 24,
         "Intelligence Artificielle": 24,
         "Robotique": 10,
-        "IA@EMMK": 2,
+        "IA@EMMK": 0,
+        "GL@EMMK": 0,
     }
 
 
@@ -100,7 +101,7 @@ def init_students(file_name: str) -> List[Student]:
     # Used to iterate on semester names by index
     semester_names = list(get_semester_weights().keys())
 
-    with open(file_name, newline="") as file:
+    with open(file_name, newline="", encoding="utf-8") as file:
         reader = csv.reader(file, delimiter=";")
         next(reader)  # Skip column names
 
@@ -125,7 +126,9 @@ def init_students(file_name: str) -> List[Student]:
 
 
 def match_student(
-    student: Student, track_count: Dict[str, int], track_capacities: Dict[str, int],
+    student: Student,
+    track_count: Dict[str, int],
+    track_capacities: Dict[str, int],
 ) -> Optional[Match]:
     """Match a student to a track according to his wishes, track count and track capacity"""
 
