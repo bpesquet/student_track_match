@@ -20,9 +20,9 @@ def get_track_capacities() -> Dict[str, int]:
 
     # Names must exactly match track names in students CSV file
     return {
-        "Augmentation et Autonomie": 24,
-        "Systèmes Cognitifs Hybrides": 24,
-        "Intelligence Artificielle": 24,
+        "Augmentation et Autonomie": 20,
+        "Systèmes Cognitifs Hybrides": 20,
+        "Intelligence Artificielle": 20,
         "Robotique": 10,
         "IA@EMMK": 0,
         "GL@EMMK": 0,
@@ -50,7 +50,7 @@ class Student:
         semester_weights: Dict[str, int] = get_semester_weights()
 
         # Compute weighted sum of student grades
-        for (semester, grade) in self.grade_list.items():
+        for semester, grade in self.grade_list.items():
             if semester in semester_weights:
                 if grade is not None:
                     weight = semester_weights[semester]
@@ -189,7 +189,7 @@ def print_input(
     print(
         f"{len(track_capacities)} parcours ({total_capacity} places) pour {len(student_list)} étudiants"
     )
-    for (name, capacity) in track_capacities.items():
+    for name, capacity in track_capacities.items():
         print(f"{name} : {capacity} places")
     print(f"Poids des semestres dans le calcul de la moyenne : {semester_weights}")
 
